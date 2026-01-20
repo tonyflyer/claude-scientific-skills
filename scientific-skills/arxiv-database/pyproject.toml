@@ -1,0 +1,25 @@
+[project]
+name = "arxiv-database"
+version = "0.1.0"
+description = "ArXiv paper search and analysis tools for Claude Scientific Skills"
+requires-python = ">=3.10"
+dependencies = [
+    "arxiv>=2.1.0",
+    "requests>=2.31.0",
+    "pydantic>=2.5.0",
+    "beautifulsoup4>=4.12.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
