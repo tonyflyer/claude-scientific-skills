@@ -24,6 +24,36 @@ This skill provides focused, efficient tools for working with the arXiv preprint
 - `literature-review` - Compare papers and identify research gaps
 - `scientific-writing` - Synthesize findings into reports
 
+## Positioning & Boundaries
+
+**arxiv-database is a Data Access Layer tool**, focused on:
+- ✅ Efficient access to arXiv as a single data source
+- ✅ Structured parsing of paper documents
+- ✅ Being called by other skills (e.g., `literature-review`)
+
+**Don't use arxiv-database for** (use other skills instead):
+- Cross-database literature reviews → `literature-review`
+- Biomedical literature searches → `pubmed-database` (via gget)
+- Citation verification and BibTeX generation → `citation-management`
+- Real-time research queries → `research-lookup`
+- Result deduplication and ranking → `literature-review`
+
+### Skill Selection Guide
+
+| Scenario | Recommended Skill | Reason |
+|----------|------------------|--------|
+| Search arXiv only | **arxiv-database** | Single data source, fast |
+| Search PubMed/bioRxiv | pubmed-database (gget) | Biomedical specialized |
+| Multi-database literature review | literature-review | Coordinates multiple sources |
+| Parse local paper files | **arxiv-database** | Supports DOCX/PDF/LaTeX |
+| Verify citation info | citation-management | Dedicated citation management |
+| Find latest research | research-lookup | Real-time search |
+| Paper quality check | paper-validator | Dedicated validation tool |
+| Generate peer review | peer-review | Structured review |
+| Assess evidence strength | scientific-critical-thinking | Deep critical analysis |
+| Generate research hypotheses | hypothesis-generation | Creative divergence |
+| Write papers | scientific-writing | Professional writing |
+
 ## When to Use This Skill
 
 Use arxiv-database when you need to:
@@ -201,73 +231,166 @@ Features:
 
 arxiv-database is designed to work seamlessly with other skills. Here are common multi-skill workflows:
 
-### Workflow 1: Literature Search + Analysis
+### Architecture Overview
 
-**Goal:** Find recent papers and analyze trends
-
-```python
-# Step 1: arxiv-database → Search & retrieve papers
-python scripts/search.py --query "transformers" --days-back 180 --output papers.json
-
-# Step 2: exploratory-data-analysis → Analyze trends
-# (Use EDA skill to visualize publication trends, citation patterns, etc.)
-
-# Step 3: scientific-writing → Summarize findings
-# (Use writing skill to generate literature review summary)
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Academic Research Skills Ecosystem                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Data Access Layer              Analysis Layer           Output Layer       │
+│  ┌─────────────────┐           ┌─────────────────┐     ┌─────────────────┐ │
+│  │ arxiv-database  │           │ paper-validator │     │ scientific-     │ │
+│  │ pubmed-database │    →      │ peer-review     │  →  │ writing         │ │
+│  │ research-lookup │           │ scientific-     │     │ hypothesis-     │ │
+│  │ citation-mgmt   │           │ critical-thinking│     │ generation      │ │
+│  └─────────────────┘           └─────────────────┘     └─────────────────┘ │
+│         ↓                             ↓                       ↓             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │              literature-review (High-Level Orchestrator)             │   │
+│  │   Coordinates multiple skills for systematic reviews & synthesis     │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Workflow 2: Comprehensive Paper Review
+### Workflow 1: Quick arXiv Search (Single Source)
 
-**Goal:** Review a paper for conference submission
+**Scenario:** Only need papers from arXiv
+
+**Skills Chain:** `arxiv-database → citation-management → [Done]`
+
+```bash
+# Step 1: Search arXiv
+python scripts/search.py --query "transformer attention" --max-results 20 --output papers.json
+
+# Step 2: Generate citations (use citation-management skill)
+# "Please generate APA format citations for papers in papers.json"
+```
+
+### Workflow 2: Comprehensive Literature Review (Multi-Source)
+
+**Scenario:** Need systematic literature review across multiple databases
+
+**⚠️ Recommendation:** For multi-database reviews, use `literature-review` skill which coordinates data sources.
+
+**Skills Chain:**
+```
+┌──────────────────────────────────────────────────┐
+│         literature-review (Orchestrator)          │
+│  ┌─────────────┐  ┌─────────────┐                │
+│  │arxiv-database│  │pubmed-database│             │
+│  └──────┬──────┘  └──────┬──────┘               │
+│         └────────┬───────┘                       │
+│                  ↓                               │
+│         Deduplicate & Rank                       │
+│                  ↓                               │
+│         citation-management                      │
+│                  ↓                               │
+│         scientific-writing                       │
+└──────────────────────────────────────────────────┘
+```
+
+**How to use:**
+```bash
+# Step 1: Use arxiv-database to search arXiv
+python scripts/search.py --query "reinforcement learning" --category cs.AI --output arxiv_results.json
+
+# Step 2: Use gget (pubmed-database) for PubMed
+# gget search pubmed "reinforcement learning" -l 50
+
+# Step 3: Use literature-review skill to:
+#   - Deduplicate results (search_databases.py --deduplicate)
+#   - Verify citations (verify_citations.py)
+#   - Generate PDF report (generate_pdf.py)
+```
+
+### Workflow 3: Deep Paper Analysis
+
+**Scenario:** In-depth analysis of one or more papers
+
+**Skills Chain:**
+```
+arxiv-database
+      ↓ (structured data)
+paper-validator ──────→ Issue list
+      ↓
+scientific-critical-thinking ──────→ Evidence assessment
+      ↓
+peer-review ──────→ Review report
+      ↓
+scientific-writing ──────→ Final report
+```
 
 ```python
-# Step 1: arxiv-database → Fetch paper and extract structure
+# Step 1: arxiv-database → Parse paper structure
 python scripts/paper_structure_extractor.py arxiv:2401.12345 -o structure.json
 
-# Step 2: literature-review → Find related work
-# (Use literature-review skill to find and compare with related papers)
+# Step 2: paper-validator → Check quality
+# - Clarity and precision
+# - Evidence validation
+# - Argument coherence
 
-# Step 3: paper-validator → Validate quality
-# (Use paper-validator skill to check clarity, evidence, arguments)
+# Step 3: scientific-critical-thinking → Deep evidence assessment
+# - Evaluate claims and supporting evidence
+# - Identify logical gaps
 
-# Step 4: peer-review → Generate review
-# (Use peer-review skill to create structured review with scores)
+# Step 4: peer-review → Generate structured review
+# - Create review with scores and recommendations
 
-# Step 5: scientific-writing → Synthesize final review
-# (Use writing skill to generate final review document)
+# Step 5: scientific-writing → Synthesize final report
 ```
 
-**Benefits of this approach:**
-- ✅ Each skill does what it does best
-- ✅ Clear separation of concerns
-- ✅ Easy to test and maintain
-- ✅ Modular and extensible
+### Workflow 4: Research Direction Exploration
 
-### Workflow 3: Literature Review for Research
+**Scenario:** Discover research opportunities based on literature
 
-**Goal:** Conduct comprehensive literature review
+**Skills Chain:**
+```
+arxiv-database
+      ↓ (paper collection)
+literature-review ──────→ Theme analysis
+      ↓
+research-lookup ──────→ Latest progress verification
+      ↓
+hypothesis-generation ──────→ Research hypotheses
+      ↓
+scientific-writing ──────→ Research proposal
+```
 
 ```python
-# Step 1: arxiv-database → Collect papers
+# Step 1: arxiv-database → Collect domain papers
 python scripts/search.py --query "reinforcement learning robotics" --max-results 50 -o papers.json
 
-# Step 2: arxiv-database → Extract structure from key papers
-for paper_id in key_papers:
-    python scripts/paper_structure_extractor.py arxiv:{paper_id} -o {paper_id}_structure.json
+# Step 2: literature-review → Analyze themes and gaps
+# - Use literature-review skill to organize by themes
+# - Identify research gaps
 
-# Step 3: literature-review → Organize by themes and identify gaps
-# (Use literature-review skill)
+# Step 3: research-lookup → Verify latest progress
+# - Ensure no recent publications are missed
 
-# Step 4: hypothesis-generation → Suggest research directions
-# (Use hypothesis-generation skill based on identified gaps)
+# Step 4: hypothesis-generation → Generate research hypotheses
+# - Based on identified gaps
 
-# Step 5: scientific-writing → Generate literature review document
-# (Use writing skill to create comprehensive review)
+# Step 5: scientific-writing → Write research proposal
 ```
 
-### Workflow 4: Paper Validation Before Submission
+### Workflow 5: Pre-Submission Validation
 
-**Goal:** Validate paper quality before submitting to conference
+**Scenario:** Quality check before conference/journal submission
+
+**Skills Chain:**
+```
+arxiv-database (parse)
+      ↓
+paper-validator (quality check)
+      ↓
+citation-management (citation verification) ←── Key! Currently missing in many workflows
+      ↓
+peer-review (mock review)
+      ↓
+scientific-writing (revision suggestions)
+```
 
 ```python
 # Step 1: arxiv-database → Parse paper structure
@@ -279,14 +402,37 @@ python scripts/paper_structure_extractor.py paper.pdf -o structure.json
 # - Argument coherence
 # - Novelty assessment
 
-# Step 3: peer-review → Get mock review
+# Step 3: citation-management → Verify all citations
+# - Check DOI validity
+# - Verify citation accuracy
+
+# Step 4: peer-review → Get mock review
 # - Generate realistic peer review
 # - Identify potential weaknesses
 
-# Step 4: scientific-writing → Improve based on feedback
+# Step 5: scientific-writing → Improve based on feedback
 # - Address identified issues
 # - Strengthen weak arguments
 ```
+
+## Skills Integration Reference
+
+| Task Phase | Primary Skill | Supporting Skills |
+|-----------|--------------|-------------------|
+| Literature Search | **arxiv-database** | citation-management |
+| Literature Review | literature-review | arxiv-database, pubmed-database |
+| Paper Parsing | **arxiv-database** | - |
+| Quality Validation | paper-validator | scientific-critical-thinking |
+| Peer Review | peer-review | paper-validator |
+| Research Exploration | hypothesis-generation | literature-review, research-lookup |
+| Paper Writing | scientific-writing | citation-management |
+
+**Key Integration Points:**
+
+1. **arxiv-database → literature-review**: Pass JSON search results for deduplication and synthesis
+2. **arxiv-database → paper-validator**: Pass structured paper data for quality analysis
+3. **arxiv-database → citation-management**: Pass paper metadata for BibTeX generation
+4. **literature-review → arxiv-database**: literature-review can request arXiv searches via arxiv-database
 
 ## Valid Categories
 
