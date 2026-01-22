@@ -1,0 +1,34 @@
+#!/bin/bash
+# arxiv-review - Quick paper review command for OpenCode/Claude Code
+# Usage: arxiv-review /path/to/paper.docx
+#        arxiv-review 2401.12345
+
+INPUT_PATH="$1"
+OUTPUT_DIR="${2:-/tmp}"
+
+if [ -z "$INPUT_PATH" ]; then
+    echo "Usage: arxiv-review <paper.docx|pdf|arxiv-id> [output_dir]"
+    echo "Examples:"
+    echo "  arxiv-review /Users/xxx/paper.docx"
+    echo "  arxiv-review 2401.12345"
+    echo "  arxiv-review paper.pdf /custom/output"
+    exit 1
+fi
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+# Determine if input is arXiv ID or file path
+if [[ "$INPUT_PATH" =~ ^[0-9]+\.[0-9]+$ ]]; then
+    echo "Reviewing arXiv paper: $INPUT_PATH"
+    python comprehensive_review.py --arxiv-id "$INPUT_PATH" --output "$OUTPUT_DIR/review_$(date +%s).json" --verbose
+elif [ -f "$INPUT_PATH" ]; then
+    echo "Reviewing document: $INPUT_PATH"
+    python comprehensive_review.py --input "$INPUT_PATH" --output "$OUTPUT_DIR/review_$(date +%s).json" --verbose
+else
+    echo "Error: Invalid input. Provide a valid file path or arXiv ID."
+    exit 1
+fi
+
+echo ""
+echo "Review complete! Output saved to: $OUTPUT_DIR"
